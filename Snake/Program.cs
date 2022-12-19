@@ -12,11 +12,7 @@ namespace Snake
             var field = new Field(20, 2);
             var length = 5;
             var snakes = new[] { 
-                new Snake(field, field.GetRandom(), length),
-                new Snake(field, field.GetRandom(), length),
-                /*new Snake(field, field.GetRandom(), length),
-                new Snake(field, field.GetRandom(), length),
-                new Snake(field, field.GetRandom(), length),*/
+                new Snake(field, field.GetRandom(), length) 
             };
 
 
@@ -25,11 +21,11 @@ namespace Snake
             {
                 Thread.Sleep(300);
                 foreach (var snake in snakes) {
-                    snake.ChangeDirection();
+                    snake.ChooseDirection(snakes);
                     snake.Move(snakes);
                 }
-                /*if (rnd.Next(0, 10) == 0)
-                    field.CreateMushroom();*/
+                if (rnd.Next(0, 10) == 0)
+                    field.CreateMushroom();
                 Draw(field);
             }
         }

@@ -112,21 +112,13 @@ namespace Snake
             }
         }
 
-        public void ChangeDirection()
+        public void ChooseDirection(IReadOnlyCollection<Snake> snakes)
         {
-            Random rnd = new Random();
-            if (rnd.Next(0, 5) <= 1)
-            {
-                var newDir = rnd.Next(0, 1);
-                if (Direction.Equals(Directions.Up))
-                    NextDirection = Directions.ChangeUp[newDir];
-                if (Direction.Equals(Directions.Down))
-                    NextDirection = Directions.ChangeDown[newDir];
-                if (Direction.Equals(Directions.Left))
-                    NextDirection = Directions.ChangeLeft[newDir];
-                if (Direction.Equals(Directions.Right))
-                    NextDirection = Directions.ChangeRight[newDir];
-            }
+            if (!this.active)
+                return;
+            var newDirection = Brain.Resolve(field, snakes, this);
+            if (newDirection != this.Direction)
+                NextDirection = newDirection;
         }
     }
 }
