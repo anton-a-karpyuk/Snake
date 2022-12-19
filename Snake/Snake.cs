@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Snake.Strategy;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -19,20 +20,22 @@ namespace Snake
         public Point Direction { get; set; } = Directions.Right;
         public Point NextDirection { get; set; } = Directions.Right;
 
-        private Field field;
+        private readonly IStrategy strategy;
+        private readonly Field field;
 
         private int length;
         private bool active = true;
-        private LinkedList<Point> movements;
+        private readonly LinkedList<Point> movements;
 
-        public Snake(Field field, Point head, int length = 3)
+        public Snake(IStrategy strategy, Field field, Point head, int length = 3)
         {
             this.Id = Guid.NewGuid();
             this.length = length;
+            this.strategy = strategy;
             this.field = field;
             this.head = head;
-            field.Area[head.X, head.Y] = HeadValue;
             this.tail = head;
+            field[head] = HeadValue;
             movements = new LinkedList<Point>();
         }
 
@@ -48,7 +51,7 @@ namespace Snake
             if (tryHead.Y < 0 || tryHead.Y >= field.Height)
                 return;
 
-            var tryValue = field.Area[tryHead.X, tryHead.Y];
+            var tryValue = field[tryHead];
             
             //Впереди тело, не укусить
             if (tryValue == BodyValue)
@@ -67,12 +70,18 @@ namespace Snake
                 Bite();
 
             movements.AddLast(Direction);
-            field.Area[this.head.X, this.head.Y] = BodyValue;
+            field[this.head] = BodyValue;
             this.head = tryHead;
-            field.Area[this.head.X, this.head.Y] = HeadValue;
             if (tryValue < TailValue)
                 MoveTail();
-            field.Area[tryHead.X, tryHead.Y] = 3;
+            field[this.head] = HeadValue;
+        }
+
+        public Point GetAhead()
+        {
+            var tryHead = new Point(this.head.X, this.head.Y);
+            tryHead.Offset(this.Direction);
+            return tryHead;
         }
 
         /// <summary>
@@ -93,7 +102,7 @@ namespace Snake
             this.length++;
         }
 
-        private Snake GetSnake(IEnumerable<Snake> snakes, Point end)
+        public static Snake? GetSnake(IEnumerable<Snake> snakes, Point end)
         {
             return snakes.FirstOrDefault(s => s.tail == end);
         }
@@ -104,11 +113,11 @@ namespace Snake
             {
                 if (movements.Count > length-1)
                 {
-                    field.Area[this.tail.X, this.tail.Y] = 0;
+                    field[this.tail] = 0;
                     this.tail.Offset(movements.First.Value);
                     movements.RemoveFirst();
                 }
-                field.Area[this.tail.X, this.tail.Y] = length > 1 ? TailValue : HeadValue;
+                field[this.tail] = length > 1 ? TailValue : HeadValue;
             }
         }
 
@@ -116,9 +125,10 @@ namespace Snake
         {
             if (!this.active)
                 return;
-            var newDirection = Brain.Resolve(field, snakes, this);
+
+            var newDirection = this.strategy.Deside(this, field, snakes);
             if (newDirection != this.Direction)
-                NextDirection = newDirection;
+                NextDirection = newDirection.Value;
         }
     }
 }

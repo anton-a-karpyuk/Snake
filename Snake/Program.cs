@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Snake.Strategy;
+using System;
 using System.Text;
 using System.Threading;
 
@@ -8,18 +9,24 @@ namespace Snake
     {
         static void Main(string[] args)
         {
+            var strategies = new IStrategy[]
+            {
+                //new RandomStrategy(),
+                new AvoidObstaclesStrategy(),
+            };
+
             Random rnd = new Random();
-            var field = new Field(20, 2);
+            var field = new Field(10, 10);
             var length = 5;
             var snakes = new[] { 
-                new Snake(field, field.GetRandom(), length) 
+                new Snake(Brain.GetStrategies(strategies), field, field.GetRandom(), length) 
             };
 
 
             Draw(field);
             while (true)
             {
-                Thread.Sleep(300);
+                Thread.Sleep(100);
                 foreach (var snake in snakes) {
                     snake.ChooseDirection(snakes);
                     snake.Move(snakes);
@@ -45,7 +52,7 @@ namespace Snake
                 row.Append("|");
                 for (var x = 0; x < field.Width; x++)
                 {
-                    row.Append(DisplayPoint(field.Area[x, y]));
+                    row.Append(DisplayPoint(field[x, y]));
                 }
                 row.Append("|");
                 Console.WriteLine(row.ToString());

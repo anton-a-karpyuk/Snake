@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Snake.Strategy;
 
@@ -8,32 +6,15 @@ namespace Snake
 {
     static class Brain
     {
-        public static Point Resolve(Field field, IReadOnlyCollection<Snake> snakes, Snake thisSnake)
+        public static IStrategy GetStrategies(IReadOnlyCollection<IStrategy> strategies)
         {
-            var directionsVote = new Dictionary<Point, int>
-            {
-                { Directions.Up, 0},
-                { Directions.Down, 0},
-                { Directions.Left, 0},
-                { Directions.Right, 0},
-            };
-            var otherSnakes = snakes.Where(s => s.Id != thisSnake.Id).ToArray();
+            if (strategies.Count == 0)
+                return new NoStrategy();
 
-            var move = new RandomStrategy().Deside(thisSnake, field, snakes);
-            if (move != null)
-                directionsVote[move.Value]++;
+            if (strategies.Count == 1)
+                return strategies.First();
 
-
-            var direction = directionsVote
-                .Where(v => v.Key == thisSnake.Direction || Directions.PossibleMoves[thisSnake.Direction].Contains(v.Key))
-                .OrderByDescending(v => v.Value)
-                .FirstOrDefault();
-
-            if (direction.Equals(default(KeyValuePair<Point, int>)))
-                return thisSnake.Direction;
-
-            return direction.Key;
+            return new CompositeStrategy(strategies);
         }
-
     }
 }
