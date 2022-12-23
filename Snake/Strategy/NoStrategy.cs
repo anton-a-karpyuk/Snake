@@ -8,7 +8,7 @@ namespace Snake.Strategy
     {
         public Point? Deside(Snake snake, Field field, IReadOnlyCollection<Snake> snakes)
         {
-            return snake.Direction;
+            return null;
         }
     }
 }

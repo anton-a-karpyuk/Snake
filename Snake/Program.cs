@@ -11,22 +11,23 @@ namespace Snake
         {
             var strategies = new IStrategy[]
             {
-                //new RandomStrategy(),
+                new RandomStrategy(),
                 new AvoidObstaclesStrategy(),
             };
 
             Random rnd = new Random();
-            var field = new Field(10, 10);
-            var length = 5;
+            var field = new Field(20, 20);
             var snakes = new[] { 
-                new Snake(Brain.GetStrategies(strategies), field, field.GetRandom(), length) 
+                new Snake(Brain.GetStrategies(strategies), field, new System.Drawing.Point(0,0), Directions.Right, 5),
+                new Snake(Brain.GetStrategies(strategies), field, new System.Drawing.Point(10,0), Directions.Right, 5),
+
             };
 
 
             Draw(field);
             while (true)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(300);
                 foreach (var snake in snakes) {
                     snake.ChooseDirection(snakes);
                     snake.Move(snakes);

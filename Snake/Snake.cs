@@ -17,8 +17,8 @@ namespace Snake
         public Point tail;
         private Point head;
 
-        public Point Direction { get; set; } = Directions.Right;
-        public Point NextDirection { get; set; } = Directions.Right;
+        public Point Direction { get; set; }
+        public Point NextDirection { get; set; }
 
         private readonly IStrategy strategy;
         private readonly Field field;
@@ -27,7 +27,7 @@ namespace Snake
         private bool active = true;
         private readonly LinkedList<Point> movements;
 
-        public Snake(IStrategy strategy, Field field, Point head, int length = 3)
+        public Snake(IStrategy strategy, Field field, Point head, Point direction, int length = 3)
         {
             this.Id = Guid.NewGuid();
             this.length = length;
@@ -35,6 +35,7 @@ namespace Snake
             this.field = field;
             this.head = head;
             this.tail = head;
+            this.NextDirection = direction;
             field[head] = HeadValue;
             movements = new LinkedList<Point>();
         }
@@ -59,7 +60,7 @@ namespace Snake
 
             if (tryValue == TailValue || tryValue == HeadValue)
             {
-                var otherSnake = GetSnake(snakes, tryHead);
+                var otherSnake = GetSnakeByTail(snakes, tryHead);
                 if (otherSnake == null || otherSnake.Id == Id)
                     return;
 
@@ -77,7 +78,7 @@ namespace Snake
             field[this.head] = HeadValue;
         }
 
-        public Point GetAhead()
+        public Point GetFieldAhead()
         {
             var tryHead = new Point(this.head.X, this.head.Y);
             tryHead.Offset(this.Direction);
@@ -93,8 +94,15 @@ namespace Snake
             this.length--;
             if (length > 0)
                 MoveTail();
-            active = false;
+            else
+                active = false;
         }
+
+        public static Snake GetSnakeByTail(IEnumerable<Snake> snakes, Point tail)
+        {
+            return snakes.FirstOrDefault(s => s.tail == tail);
+        }
+
 
         private void Bite(Snake snake = null)
         {
@@ -102,10 +110,6 @@ namespace Snake
             this.length++;
         }
 
-        public static Snake? GetSnake(IEnumerable<Snake> snakes, Point end)
-        {
-            return snakes.FirstOrDefault(s => s.tail == end);
-        }
 
         private void MoveTail()
         {
@@ -127,7 +131,7 @@ namespace Snake
                 return;
 
             var newDirection = this.strategy.Deside(this, field, snakes);
-            if (newDirection != this.Direction)
+            if (newDirection != null && newDirection != this.Direction)
                 NextDirection = newDirection.Value;
         }
     }

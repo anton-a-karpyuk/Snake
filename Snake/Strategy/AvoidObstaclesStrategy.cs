@@ -9,12 +9,12 @@ namespace Snake.Strategy
     {
         public Point? Deside(Snake snake, Field field, IReadOnlyCollection<Snake> snakes)
         {
-            var pointAhead = snake.GetAhead();
+            var pointAhead = snake.GetFieldAhead();
             var notAvailableDirections = new List<Point>();
 
             try
             {
-                if (field[pointAhead] == Snake.BodyValue || Snake.GetSnake(snakes, pointAhead)?.Id == snake.Id)
+                if (field[pointAhead] == Snake.BodyValue || Snake.GetSnakeByTail(snakes, pointAhead)?.Id == snake.Id || field[pointAhead] == Snake.HeadValue)
                     notAvailableDirections.Add(snake.Direction);
             }
             catch (Exception e)
